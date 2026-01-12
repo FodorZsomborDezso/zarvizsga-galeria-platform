@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2026. Jan 11. 13:48
+-- Létrehozás ideje: 2026. Jan 12. 17:30
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -20,6 +20,17 @@ SET time_zone = "+00:00";
 --
 -- Adatbázis: `artisticeye`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `cimkék`
+--
+
+CREATE TABLE `cimkék` (
+  `id` int(11) NOT NULL,
+  `nev` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -58,6 +69,29 @@ CREATE TABLE `feltoltesek` (
 -- --------------------------------------------------------
 
 --
+-- Tábla szerkezet ehhez a táblához `feltoltes_cimkék`
+--
+
+CREATE TABLE `feltoltes_cimkék` (
+  `feltoltes_id` int(11) NOT NULL,
+  `cimke_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `follows`
+--
+
+CREATE TABLE `follows` (
+  `koveto_id` int(11) NOT NULL,
+  `kovetett_id` int(11) NOT NULL,
+  `keszul` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Tábla szerkezet ehhez a táblához `kommentek`
 --
 
@@ -87,6 +121,13 @@ CREATE TABLE `likeok` (
 --
 
 --
+-- A tábla indexei `cimkék`
+--
+ALTER TABLE `cimkék`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nev` (`nev`);
+
+--
 -- A tábla indexei `felhasznalok`
 --
 ALTER TABLE `felhasznalok`
@@ -100,6 +141,20 @@ ALTER TABLE `felhasznalok`
 ALTER TABLE `feltoltesek`
   ADD PRIMARY KEY (`id`),
   ADD KEY `felhasznalo_id` (`felhasznalo_id`);
+
+--
+-- A tábla indexei `feltoltes_cimkék`
+--
+ALTER TABLE `feltoltes_cimkék`
+  ADD PRIMARY KEY (`feltoltes_id`,`cimke_id`),
+  ADD KEY `cimke_id` (`cimke_id`);
+
+--
+-- A tábla indexei `follows`
+--
+ALTER TABLE `follows`
+  ADD PRIMARY KEY (`koveto_id`,`kovetett_id`),
+  ADD KEY `kovetett_id` (`kovetett_id`);
 
 --
 -- A tábla indexei `kommentek`
@@ -119,6 +174,12 @@ ALTER TABLE `likeok`
 --
 -- A kiírt táblák AUTO_INCREMENT értéke
 --
+
+--
+-- AUTO_INCREMENT a táblához `cimkék`
+--
+ALTER TABLE `cimkék`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT a táblához `felhasznalok`
@@ -147,6 +208,20 @@ ALTER TABLE `kommentek`
 --
 ALTER TABLE `feltoltesek`
   ADD CONSTRAINT `feltoltesek_ibfk_1` FOREIGN KEY (`felhasznalo_id`) REFERENCES `felhasznalok` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `feltoltes_cimkék`
+--
+ALTER TABLE `feltoltes_cimkék`
+  ADD CONSTRAINT `feltoltes_cimkék_ibfk_1` FOREIGN KEY (`feltoltes_id`) REFERENCES `feltoltesek` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `feltoltes_cimkék_ibfk_2` FOREIGN KEY (`cimke_id`) REFERENCES `cimkék` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `follows`
+--
+ALTER TABLE `follows`
+  ADD CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`koveto_id`) REFERENCES `felhasznalok` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`kovetett_id`) REFERENCES `felhasznalok` (`id`) ON DELETE CASCADE;
 
 --
 -- Megkötések a táblához `kommentek`
